@@ -1,0 +1,289 @@
+{
+	"info": {
+		"_postman_id": "df45e902-8c00-ebee-dc4a-1dd45c4aae62",
+		"name": "Zoap",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "wsdl",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c6060120-659a-407f-a683-218ff79bcef0",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Complex type 'ArrayOfProduct' was discovered\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"tns:ArrayOfProduct\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "firstName",
+							"value": "Adam",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{domain}}/zoap/demo/server?wsdl",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"zoap",
+						"demo",
+						"server"
+					],
+					"query": [
+						{
+							"key": "wsdl",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b4297775-2f9e-43bd-ace5-86404391d0f4",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:oper=\"{{domain}}/zoap/demo/server\">\n    <soapenv:Header/>\n    <soapenv:Body>\n        <oper:auth>\n            <oper:user>{{user}}</oper:user>\n            <oper:password>{{password}}</oper:password>\n        </oper:auth>\n    </soapenv:Body>\n</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "{{domain}}/zoap/demo/server",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"zoap",
+						"demo",
+						"server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8b8d5ac3-d83e-4f38-890b-abbcbe524b41",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Body contains 'true'\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"true\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:oper=\"{{domain}}/zoap/demo/server\">\r    <soapenv:Header/>\r    <soapenv:Body>\r        <oper:ping>\r        \t<oper:token>{{token}}</oper:token>\r        </oper:ping>\r    </soapenv:Body>\r</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "{{domain}}/zoap/demo/server",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"zoap",
+						"demo",
+						"server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getProduct",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "77b32064-9441-42af-a58e-35ce61963410",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:oper=\"{{domain}}/zoap/demo/server\">\n    <soapenv:Header/>\n    <soapenv:Body>\n        <oper:getProduct>\n        \t<oper:productId>456</oper:productId>\n            <oper:token>{{token}}</oper:token>\n        </oper:getProduct>\n    </soapenv:Body>\n</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "{{domain}}/zoap/demo/server",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"zoap",
+						"demo",
+						"server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getProducts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "93bdb6d4-4b10-4365-b304-208a03831dc6",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:oper=\"{{domain}}/zoap/demo/server\">\r    <soapenv:Header/>\r    <soapenv:Body>\r        <oper:getProducts>\r        \t<oper:criteria>\r                <oper:keyValue>\r                    <oper:key>category</oper:key>\r                    <oper:value>Outerwear</oper:value>\r                </oper:keyValue>\r            </oper:criteria>\r            <oper:token>{{token}}</oper:token>\r        </oper:getProducts>\r    </soapenv:Body>\r</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "{{domain}}/zoap/demo/server",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"zoap",
+						"demo",
+						"server"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "3e54cfbb-cd79-4886-ace7-fefc587a7af7",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "3643b0f5-ee8b-45b1-9381-5f781d4ac0d8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "095ec8cd-48c6-46ea-81ea-e2c9831f75e2",
+			"key": "domain",
+			"value": "http://example.com",
+			"type": "string",
+			"description": ""
+		},
+		{
+			"id": "8014ce93-723b-400f-86b9-f9d19f7c36ed",
+			"key": "user",
+			"value": "test@test.com",
+			"type": "string",
+			"description": ""
+		},
+		{
+			"id": "b39902dc-5edf-4e7a-8b74-7c7d285d30dc",
+			"key": "password",
+			"value": "tester",
+			"type": "string",
+			"description": ""
+		},
+		{
+			"id": "4f4496dd-5939-4b8f-b9c3-b1a4deb94608",
+			"key": "token",
+			"value": "tGSGYv8al1Ce6Rui8oa4Kjo8ADhYvR9x8KFZOeEGWgU1iscF7N2tUnI3t9bX",
+			"type": "string",
+			"description": ""
+		}
+	]
+}

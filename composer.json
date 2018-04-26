@@ -1,0 +1,28 @@
+{
+  "name": "viewflex/zoap",
+  "description": "For quickly deploying SOAP services in a Laravel application, with auto-discovery of WSDL definitions.",
+  "keywords": ["laravel", "soap", "server", "api"],
+  "authors": [
+    {
+      "name": "Adam Sailor",
+      "email": "viewflex.contact@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "require": {
+    "laravel/framework": "~5.2",
+    "zendframework/zend-soap": "^2.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Viewflex\\Zoap\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Viewflex\\Zoap\\ZoapServiceProvider"
+      ]
+    }
+  }
+}
