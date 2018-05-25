@@ -2,6 +2,11 @@
 
 This document tracks changes in release versions of **Zoap**. This project adheres to the [Semantic Versioning](http://semver.org/spec/v2.0.0.html) standard.
 
+## Version [1.0.2](https://github.com/viewflex/zoap/tree/1.0.2) - 2018-05-25
+
+### Removed
+
+- Line requiring laravel/framework in composer.json.
 
 
 ## Version [1.0.1](https://github.com/viewflex/zoap/tree/1.0.1) - 2018-05-25
@@ -14,9 +19,6 @@ This document tracks changes in release versions of **Zoap**. This project adher
 
 - Minor refactoring for Lumen compatibility
 
-### Removed
-
-- Line requiring laravel/framework in composer.json.
 
 ## Version [1.0.0](https://github.com/viewflex/zoap/tree/1.0) - 2018-04-26
 
