@@ -10,7 +10,6 @@
   ],
   "license": "MIT",
   "require": {
-    "laravel/framework": "~5.2",
     "zendframework/zend-soap": "^2.7"
   },
   "autoload": {
