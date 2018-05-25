@@ -32,7 +32,7 @@ class ZoapServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/Resources/views' => base_path('resources/views/vendor/zoap'),
-            __DIR__.'/../config/zoap.php' => config_path('zoap.php')
+            __DIR__.'/../config/zoap.php' => base_path('config/zoap.php')
         ], 'zoap');
 
     }

@@ -1,16 +1,20 @@
 # Zoap
 
-[![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE.md)
+[![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](LICENSE.md)
 
-Instant SOAP server for Laravel, turns any class into a WS-I compliant SOAP service, with automatic discovery and generation of WSDL definitions. Wraps the Zend SOAP components to provide easy declarative configuration of services, requiring no additional coding.
+Instant SOAP server for Laravel and Lumen, turns any class into a WS-I compliant SOAP service, with automatic discovery of WSDL definitions. Wraps the Zend SOAP components to provide easy declarative configuration of services, requiring no additional coding.
 
 ## Overview
+
+### System Requirements
+
+Laravel or Lumen framework, version 5.2 or greater.
 
 ### Basic Steps
 
 Setting up services is quick and painless:
 
-* Install this package in your Laravel project.
+* Install this package in your Laravel or Lumen application.
 * Publish the config file for customization.
 * Define configurations for your services.
 
@@ -25,18 +29,31 @@ This package uses the `document/literal wrapped` pattern in SOAP communications 
 
 ## Installation
 
-Via Composer:
+From your Laravel or Lumen application's root directory, install via Composer:
 
 ```bash
 composer require viewflex/zoap
 ```
 
-After installing, add the `ZoapServiceProvider` to the list of service providers in Laravel's `config/app.php` file. If you are using Laravel version 5.5 or later, this step is not necessary.
+After installing, add the `ZoapServiceProvider` to the list of service providers:
+
+### For Laravel
+
+Add this line in `config/app.php`. If you are using Laravel version 5.5 or greater, this step is not necessary.
 
 ```php
 Viewflex\Zoap\ZoapServiceProvider::class,
 ```
 
+### For Lumen
+
+Add this line in `bootstrap/app.php`:
+
+```php
+$app->register(Viewflex\Zoap\ZoapServiceProvider::class);
+```
+
+You may also want to install the [irazasyed/larasupport](https://github.com/irazasyed/larasupport) package, which adds a few basic Laravel features to Lumen, including support for publishing package files. This will allow you to publish the Zoap config and view files for customization as described [below](#configuration); otherwise, you can just copy those files manually from the package to their published locations.
 
 ## Configuration
 
@@ -47,6 +64,8 @@ Run this command to publish the `zoap.php` config file to the project's `config`
 ```bash
 php artisan vendor:publish  --tag='zoap'
 ```
+
+This will also publish the SoapFault response template to your project's `resources/views/vendor/zoap` directory.
 
 ### Logging
 
@@ -115,19 +134,21 @@ A `Content-Type` header of 'application/xml; charset=utf-8' is set automatically
 
 ## Routing
 
-The package routes file lists one route, used to access the Demo service:
+The package routes file routes the Demo service:
 
 ```php
-Route::any('zoap/{key}/server',
-    array(
-        'as' => 'zoap.server', 
-        'uses' => '\Viewflex\Zoap\Controllers\ZoapController@server',
-        'middleware' => 'api'
-    )
-);
+app()->router->get('zoap/{key}/server', [
+    'as' => 'zoap.server.wsdl',
+    'uses' => '\Viewflex\Zoap\ZoapController@server'
+]);
+
+app()->router->post('zoap/{key}/server', [
+    'as' => 'zoap.server',
+    'uses' => '\Viewflex\Zoap\ZoapController@server'
+]);
 ```
 
-Use this route or create new routes as necessary to access your SOAP services on the `ZoapController` class, using the same URL parameter `$key`.
+Use this route or create new routes as necessary to access your SOAP services on the `ZoapController` class, using the same URL parameter `{key}` to indicate the key for a service configuration. The key 'demo' is used to look up the Demo [service configuration](#configuration).
 
 ## Usage
 
@@ -527,3 +548,7 @@ Using an HTTP client such as [Postman](https://www.getpostman.com/), you can tes
 ## License
 
 This software is offered for use under the [MIT License](LICENSE.md).
+
+## Changelog
+
+Release versions are tracked in the [Changelog](CHANGELOG.md).
