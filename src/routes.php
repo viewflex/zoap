@@ -1,9 +1,11 @@
 <?php
 
-Route::any('zoap/{key}/server',
-    array(
-        'as' => 'zoap.server', 
-        'uses' => '\Viewflex\Zoap\ZoapController@server',
-        'middleware' => 'api'
-    )
-);
+app()->router->get('zoap/{key}/server', [
+    'as' => 'zoap.server.wsdl',
+    'uses' => '\Viewflex\Zoap\ZoapController@server'
+]);
+
+app()->router->post('zoap/{key}/server', [
+    'as' => 'zoap.server',
+    'uses' => '\Viewflex\Zoap\ZoapController@server'
+]);
