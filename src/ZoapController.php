@@ -183,9 +183,9 @@ class ZoapController extends Controller
      */
     public static function currentUrlRoot()
     {
-        $url = url(request()->server()['REQUEST_URI']);
+        $url = url(app()->request->server()['REQUEST_URI']);
         $pos = strpos($url, '?');
-        return $pos ? substr($url, 0, $pos) : substr($url, 0);
+        return $pos ? substr($url, 0, $pos) : $url;
     }
     
     /**
