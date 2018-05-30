@@ -3,9 +3,10 @@
 namespace Viewflex\Zoap;
 
 
-use App\Http\Controllers\Controller;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use SoapFault;
 use Zend\Soap\AutoDiscover;
 use Zend\Soap\Server;
@@ -13,7 +14,7 @@ use Zend\Soap\Server\DocumentLiteralWrapper;
 use Zend\Soap\Wsdl;
 use Zend\Soap\Wsdl\ComplexTypeStrategy\ComplexTypeStrategyInterface;
 
-class ZoapController extends Controller
+class ZoapController
 {
     
     /**
@@ -98,7 +99,7 @@ class ZoapController extends Controller
      * Return results of a call to the specified service.
      *
      * @param $key
-     * @return \Illuminate\Contracts\View\Factory|Response|\Illuminate\View\View
+     * @return Factory|Response|View
      */
     public function server($key)
     {
@@ -207,7 +208,7 @@ class ZoapController extends Controller
      * Return error response and log stack trace.
      *
      * @param \Exception $exception
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public static function serverFault(\Exception $exception)
     {
