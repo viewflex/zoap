@@ -51,6 +51,11 @@ class ZoapController
      * @var array
      */
     protected $headers;
+
+    /**
+     * @var array
+     */
+    protected $options;
     
     /**
      * Initialize service attributes, disable PHP WSDL caching.
@@ -61,6 +66,10 @@ class ZoapController
     public function init($key)
     {
         $config = config('zoap.services.'.$key);
+
+        if (! $config) {
+            throw new \Exception('Please specify a valid service configuration.');
+        }
 
         $this->name = $config['name'];
         $this->service = $config['class'];
@@ -85,6 +94,7 @@ class ZoapController
         $this->strategy = new $strategy();
 
         $this->headers = $config['headers'];
+        $this->options = array_key_exists('options', $config) ? $config['options'] : [];
 
         if (! array_key_exists('Content-Type', $this->headers)) {
             $this->headers = array_add($this->headers, 'Content-Type', 'application/xml; charset=utf-8');
@@ -144,6 +154,7 @@ class ZoapController
                 $server = new Server($this->endpoint . '?wsdl');
                 $server->setClass(new DocumentLiteralWrapper(new $this->service()));
                 $server->registerFaultException($this->exceptions);
+                $server->setOptions($this->options);
 
                 // Intercept response, then decide what to do with it.
                 $server->setReturnResponse(true);

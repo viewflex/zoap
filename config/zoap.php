@@ -19,7 +19,8 @@ return [
             'strategy'          => 'ArrayOfTypeComplex',
             'headers'           => [
                 'Cache-Control'     => 'no-cache, no-store'
-            ]
+            ],
+            'options'           => []
         ]
         
     ],

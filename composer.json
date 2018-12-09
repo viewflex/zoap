@@ -1,7 +1,7 @@
 {
   "name": "viewflex/zoap",
-  "description": "For quickly deploying SOAP services in a Laravel application, with auto-discovery of WSDL definitions.",
-  "keywords": ["laravel", "soap", "server", "api"],
+  "description": "For quickly deploying SOAP services in Laravel and Lumen, with auto-discovery of WSDL definitions.",
+  "keywords": ["laravel", "lumen", "soap", "soap server", "soap api"],
   "authors": [
     {
       "name": "Adam Sailor",
