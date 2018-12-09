@@ -3,9 +3,10 @@
 namespace Viewflex\Zoap;
 
 
-use App\Http\Controllers\Controller;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use SoapFault;
 use Zend\Soap\AutoDiscover;
 use Zend\Soap\Server;
@@ -13,7 +14,7 @@ use Zend\Soap\Server\DocumentLiteralWrapper;
 use Zend\Soap\Wsdl;
 use Zend\Soap\Wsdl\ComplexTypeStrategy\ComplexTypeStrategyInterface;
 
-class ZoapController extends Controller
+class ZoapController
 {
     
     /**
@@ -50,6 +51,11 @@ class ZoapController extends Controller
      * @var array
      */
     protected $headers;
+
+    /**
+     * @var array
+     */
+    protected $options;
     
     /**
      * Initialize service attributes, disable PHP WSDL caching.
@@ -60,6 +66,10 @@ class ZoapController extends Controller
     public function init($key)
     {
         $config = config('zoap.services.'.$key);
+
+        if (! $config) {
+            throw new \Exception('Please specify a valid service configuration.');
+        }
 
         $this->name = $config['name'];
         $this->service = $config['class'];
@@ -84,6 +94,7 @@ class ZoapController extends Controller
         $this->strategy = new $strategy();
 
         $this->headers = $config['headers'];
+        $this->options = array_key_exists('options', $config) ? $config['options'] : [];
 
         if (! array_key_exists('Content-Type', $this->headers)) {
             $this->headers = array_add($this->headers, 'Content-Type', 'application/xml; charset=utf-8');
@@ -98,7 +109,7 @@ class ZoapController extends Controller
      * Return results of a call to the specified service.
      *
      * @param $key
-     * @return \Illuminate\Contracts\View\Factory|Response|\Illuminate\View\View
+     * @return Factory|Response|View
      */
     public function server($key)
     {
@@ -143,6 +154,7 @@ class ZoapController extends Controller
                 $server = new Server($this->endpoint . '?wsdl');
                 $server->setClass(new DocumentLiteralWrapper(new $this->service()));
                 $server->registerFaultException($this->exceptions);
+                $server->setOptions($this->options);
 
                 // Intercept response, then decide what to do with it.
                 $server->setReturnResponse(true);
@@ -207,7 +219,7 @@ class ZoapController extends Controller
      * Return error response and log stack trace.
      *
      * @param \Exception $exception
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public static function serverFault(\Exception $exception)
     {

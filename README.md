@@ -94,7 +94,8 @@ The Demo service is provided as an example; it's configuration is shown here:
             'strategy'          => 'ArrayOfTypeComplex',
             'headers'           => [
                 'Cache-Control'     => 'no-cache, no-store'
-            ]
+            ],
+            'options'           => []
         ]
 
     ],
@@ -131,6 +132,9 @@ If not specified, the `ArrayOfTypeComplex` strategy will be used.
 
 A `Content-Type` header of 'application/xml; charset=utf-8' is set automatically if not otherwise specified here. Specify any additional HTTP response headers required.
 
+#### Options
+
+Specify an array of server options for this service (optional).
 
 ## Routing
 
