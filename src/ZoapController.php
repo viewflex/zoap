@@ -5,6 +5,7 @@ namespace Viewflex\Zoap;
 
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use SoapFault;
@@ -97,7 +98,7 @@ class ZoapController
         $this->options = array_key_exists('options', $config) ? $config['options'] : [];
 
         if (! array_key_exists('Content-Type', $this->headers)) {
-            $this->headers = array_add($this->headers, 'Content-Type', 'application/xml; charset=utf-8');
+            $this->headers = Arr::add($this->headers, 'Content-Type', 'application/xml; charset=utf-8');
         }
 
         ini_set('soap.wsdl_cache_enable', 0);
