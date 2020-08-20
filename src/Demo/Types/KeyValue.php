@@ -8,19 +8,20 @@ class KeyValue
     /**
      * @var string
      */
-    public $key = '';
+    public $key;
 
     /**
      * @var string
      */
-    public $value = '';
+    public $value;
 
     /**
      * KeyValue constructor.
+     *
      * @param string $key
      * @param string $value
      */
-    public function __construct($key='', $value='')
+    public function __construct($key = '', $value = '')
     {
         $this->key = $key;
         $this->value = $value;

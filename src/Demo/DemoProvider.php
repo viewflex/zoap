@@ -19,7 +19,7 @@ class DemoProvider
      */
     public static function validateUser($user, $password)
     {
-        return (($user == config('zoap.mock.user')) && ($password == config('zoap.mock.password'))) ? true : false;
+        return ($user == config('zoap.mock.user')) && ($password == config('zoap.mock.password'));
     }
 
     /**
@@ -84,10 +84,10 @@ class DemoProvider
      */
     public static function findProductsBy($criteria = [])
     {
-        return array(
+        return [
             new Product(456, 'North Face Summit Ski Jacket', 'Outerwear', 'Women', 249.98),
             new Product(789, 'Marmot Crew Neck Base Layer', 'Outerwear', 'Men', 95.29)
-        );
+        ];
     }
     
 }

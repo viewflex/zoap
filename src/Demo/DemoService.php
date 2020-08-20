@@ -5,6 +5,8 @@ namespace Viewflex\Zoap\Demo;
 
 use SoapFault;
 use Viewflex\Zoap\Demo\DemoProvider as Provider;
+use Viewflex\Zoap\Demo\Types\KeyValue;
+use Viewflex\Zoap\Demo\Types\Product;
 
 /**
  * An example of a class that is used as a SOAP gateway to application functions.
@@ -58,7 +60,7 @@ class DemoService
      * @param string $token
      * @param string $user
      * @param string $password
-     * @return \Viewflex\Zoap\Demo\Types\Product
+     * @return Product
      * @throws SoapFault
      */
     public function getProduct($productId, $token = '', $user = '', $password = '')
@@ -80,11 +82,11 @@ class DemoService
     /**
      * Returns an array of products by search criteria.
      *
-     * @param \Viewflex\Zoap\Demo\Types\KeyValue[] $criteria
+     * @param KeyValue[] $criteria
      * @param string $token
      * @param string $user
      * @param string $password
-     * @return \Viewflex\Zoap\Demo\Types\Product[]
+     * @return Product[]
      * @throws SoapFault
      */
     public function getProducts($criteria = [], $token = '', $user = '', $password = '')
@@ -108,7 +110,7 @@ class DemoService
     /**
      * Convert array of KeyValue objects to associative array, non-recursively.
      *
-     * @param \Viewflex\Zoap\Demo\Types\KeyValue[] $objects
+     * @param KeyValue[] $objects
      * @return array
      */
     protected static function arrayOfKeyValueToArray($objects)
