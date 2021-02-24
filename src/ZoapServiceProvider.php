@@ -31,8 +31,8 @@ class ZoapServiceProvider extends ServiceProvider
         */
 
         $this->publishes([
-            __DIR__.'/Resources/views' => base_path('resources/views/vendor/zoap'),
-            __DIR__.'/../config/zoap.php' => base_path('config/zoap.php')
+            __DIR__ . '/Resources/views' => base_path('resources/views/vendor/zoap'),
+            __DIR__ . '/../config/zoap.php' => base_path('config/zoap.php')
         ], 'zoap');
 
     }
@@ -52,7 +52,7 @@ class ZoapServiceProvider extends ServiceProvider
         */
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/zoap.php', 'zoap'
+            __DIR__ . '/../config/zoap.php', 'zoap'
         );
 
 
