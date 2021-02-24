@@ -19,7 +19,7 @@ class DemoProvider
      */
     public static function validateUser($user, $password)
     {
-        return (($user == config('zoap.mock.user')) && ($password == config('zoap.mock.password'))) ? true : false;
+        return ( ($user == config('zoap.mock.user')) && ($password == config('zoap.mock.password')) );
     }
 
     /**
