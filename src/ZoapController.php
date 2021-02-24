@@ -9,11 +9,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use SoapFault;
-use Zend\Soap\AutoDiscover;
-use Zend\Soap\Server;
-use Zend\Soap\Server\DocumentLiteralWrapper;
-use Zend\Soap\Wsdl;
-use Zend\Soap\Wsdl\ComplexTypeStrategy\ComplexTypeStrategyInterface;
+use Laminas\Soap\AutoDiscover;
+use Laminas\Soap\Server;
+use Laminas\Soap\Server\DocumentLiteralWrapper;
+use Laminas\Soap\Wsdl;
+use Laminas\Soap\Wsdl\ComplexTypeStrategy\ComplexTypeStrategyInterface;
 
 class ZoapController
 {
@@ -91,7 +91,7 @@ class ZoapController
             throw new \Exception('Please specify a valid complex type strategy.');
         }
 
-        $strategy = "Zend\\Soap\\Wsdl\\ComplexTypeStrategy\\" . $strategy;
+        $strategy = "Laminas\\Soap\\Wsdl\\ComplexTypeStrategy\\" . $strategy;
         $this->strategy = new $strategy();
 
         $this->headers = $config['headers'];
