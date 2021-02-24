@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "require": {
-    "zendframework/zend-soap": "^2.7"
+    "laminas/laminas-soap": "^2.9"
   },
   "autoload": {
     "psr-4": {

@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](LICENSE.md)
 
-Instant SOAP server for Laravel and Lumen, turns any class into a WS-I compliant SOAP service, with automatic discovery of WSDL definitions. Wraps the Zend SOAP components to provide easy declarative configuration of services, requiring no additional coding.
+Instant SOAP server for Laravel and Lumen, turns any class into a WS-I compliant SOAP service, with automatic discovery of WSDL definitions. Wraps the Laminas SOAP components to provide easy declarative configuration of services, requiring no additional coding.
 
 ## Overview
 
