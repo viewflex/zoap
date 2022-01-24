@@ -51,9 +51,16 @@ class ZoapServiceProvider extends ServiceProvider
         |--------------------------------------------------------------------------
         */
 
-        $this->mergeConfigFrom(
-            __DIR__ . '/../config/zoap.php', 'zoap'
-        );
+        if (file_exists(base_path('config/zoap.php'))){
+            $this->mergeConfigFrom(
+                base_path('config/zoap.php'), 'zoap'
+            );
+        }else{
+            $this->mergeConfigFrom(
+
+                __DIR__.'/../config/zoap.php', 'zoap'
+            );
+        }
 
 
         /*
