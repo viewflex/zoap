@@ -125,7 +125,7 @@ class ZoapController
                 $output->headers->set($key, $value);
             }
             
-            if (isset($_GET['wsdl'])) {
+            if (request()->exists('wsdl')) {
 
                 // Create wsdl object and register type(s).
                 $wsdl = new Wsdl('wsdl', $this->endpoint);
@@ -159,7 +159,7 @@ class ZoapController
 
                 // Intercept response, then decide what to do with it.
                 $server->setReturnResponse(true);
-                $response = $server->handle();
+                $response = $server->handle(request()->getContent());
 
                 // Deal with a thrown exception that was converted into a SoapFault.
                 // SoapFault thrown directly in a service class bypasses this code.
