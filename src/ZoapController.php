@@ -75,8 +75,8 @@ class ZoapController
         $this->name = $config['name'];
         $this->service = $config['class'];
         $this->endpoint = self::currentUrlRoot();
-        $this->exceptions = $config['exceptions'];
-        $this->types = $config['types'];
+        $this->exceptions = Arr::get($config, 'exceptions', []);
+        $this->types = Arr::get($config, 'types', []);
 
         $strategies = [
             'AnyType',
@@ -85,7 +85,7 @@ class ZoapController
             'DefaultComplexType'
         ];
 
-        $strategy = ($config['strategy']) ? : 'ArrayOfTypeComplex';
+        $strategy = Arr::get($config, 'strategy') ? : 'ArrayOfTypeComplex';
         
         if (! in_array($strategy, $strategies)) {
             throw new \Exception('Please specify a valid complex type strategy.');
@@ -94,8 +94,8 @@ class ZoapController
         $strategy = "Laminas\\Soap\\Wsdl\\ComplexTypeStrategy\\" . $strategy;
         $this->strategy = new $strategy();
 
-        $this->headers = $config['headers'];
-        $this->options = array_key_exists('options', $config) ? $config['options'] : [];
+        $this->headers = Arr::get($config, 'headers', []);
+        $this->options = Arr::get($config, 'options', []);
 
         if (! array_key_exists('Content-Type', $this->headers)) {
             $this->headers = Arr::add($this->headers, 'Content-Type', 'application/xml; charset=utf-8');
@@ -114,64 +114,60 @@ class ZoapController
      */
     public function server($key)
     {
+        $request = app('request');
         $output = new Response();
         ob_start();
 
         try {
 
             $this->init($key);
-            
-            foreach($this->headers as $key => $value) {
-                $output->headers->set($key, $value);
+
+            foreach($this->headers as $name => $value) {
+                $output->headers->set($name, $value);
             }
-            
-            if (isset($_GET['wsdl'])) {
 
-                // Create wsdl object and register type(s).
-                $wsdl = new Wsdl('wsdl', $this->endpoint);
+            if ($request->query->has('wsdl')) {
 
-                foreach($this->types as $key => $class) {
-                    $wsdl->addType($class, $key);
-                }
-
-                // Set type(s) on strategy object.
-                $this->strategy->setContext($wsdl);
-
-                foreach($this->types as $key => $class) {
-                    $this->strategy->addComplexType($class);
-                }
-
-                // Auto-discover and output xml.
-                $discover = new AutoDiscover($this->strategy);
-                $discover->setBindingStyle(array('style' => 'document'));
-                $discover->setOperationBodyStyle(array('use' => 'literal'));
-                $discover->setClass($this->service);
-                $discover->setUri($this->endpoint);
-                $discover->setServiceName($this->name);
-                echo $discover->toXml();
+                echo $this->buildWsdl();
 
             } else {
-                
-                $server = new Server($this->endpoint . '?wsdl');
-                $server->setClass(new DocumentLiteralWrapper(new $this->service()));
-                $server->registerFaultException($this->exceptions);
-                $server->setOptions($this->options);
 
-                // Intercept response, then decide what to do with it.
-                $server->setReturnResponse(true);
-                $response = $server->handle();
+                // Serve from the WSDL generated in-process, rather than having
+                // the SOAP server fetch it from this endpoint over HTTP.
+                $wsdlFile = tempnam(sys_get_temp_dir(), 'zoap');
+                file_put_contents($wsdlFile, $this->buildWsdl());
+
+                try {
+
+                    $server = new Server($wsdlFile);
+                    $server->setClass(new DocumentLiteralWrapper(new $this->service()));
+                    $server->registerFaultException($this->exceptions);
+                    $server->setOptions($this->options);
+
+                    // Intercept response, then decide what to do with it.
+                    $server->setReturnResponse(true);
+                    $response = $server->handle($request->getContent());
+
+                } finally {
+                    @unlink($wsdlFile);
+                }
 
                 // Deal with a thrown exception that was converted into a SoapFault.
-                // SoapFault thrown directly in a service class bypasses this code.
+                // SoapFault thrown directly in a service class is rendered by the
+                // SOAP server itself, so detect it in the response.
                 if ($response instanceof SoapFault) {
 
-                    $output->headers->set("Status", 500);
+                    $output->setStatusCode(500);
                     echo self::serverFault($response);
-                    
+
                 } else {
-                    
+
+                    if (self::isFault($response)) {
+                        $output->setStatusCode(500);
+                    }
+
                     echo $response;
-                    
+
                 }
 
             }
@@ -179,14 +175,80 @@ class ZoapController
 
         } catch (\Exception $e) {
 
-            $output->headers->set("Status", 500);
+            $output->setStatusCode(500);
             echo self::serverFault($e);
-            
+
+        } catch (\Throwable $e) {
+
+            // Don't expose internal error messages, as with unregistered exceptions.
+            self::log($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            $output->setStatusCode(500);
+            echo self::serverFault(new \Exception('Unknown error', 0, $e));
+
+        }
+
+        // Faults raised before service headers were applied still need an XML content type.
+        if (! $output->headers->has('Content-Type')) {
+            $output->headers->set('Content-Type', 'application/xml; charset=utf-8');
         }
 
         $output->setContent(ob_get_clean());
         return $output;
 
+    }
+
+    /**
+     * Generate the WSDL for the current service by auto-discovery.
+     *
+     * @return string
+     */
+    protected function buildWsdl()
+    {
+        // Create wsdl object and register type(s).
+        $wsdl = new Wsdl('wsdl', $this->endpoint);
+
+        foreach($this->types as $key => $class) {
+            $wsdl->addType($class, $key);
+        }
+
+        // Set type(s) on strategy object.
+        $this->strategy->setContext($wsdl);
+
+        foreach($this->types as $key => $class) {
+            $this->strategy->addComplexType($class);
+        }
+
+        // Auto-discover and return xml.
+        $discover = new AutoDiscover($this->strategy);
+        $discover->setBindingStyle(array('style' => 'document'));
+        $discover->setOperationBodyStyle(array('use' => 'literal'));
+        $discover->setClass($this->service);
+        $discover->setUri($this->endpoint);
+        $discover->setServiceName($this->name);
+
+        return $discover->toXml();
+    }
+
+    /**
+     * Determine whether a SOAP response contains a fault.
+     *
+     * @param mixed $response
+     * @return bool
+     */
+    public static function isFault($response)
+    {
+        if (! is_string($response) || strpos($response, 'Fault') === false) {
+            return false;
+        }
+
+        $dom = new \DOMDocument();
+
+        if (! @$dom->loadXML($response)) {
+            return false;
+        }
+
+        return $dom->getElementsByTagNameNS('http://schemas.xmlsoap.org/soap/envelope/', 'Fault')->length > 0
+            || $dom->getElementsByTagNameNS('http://www.w3.org/2003/05/soap-envelope', 'Fault')->length > 0;
     }
 
     /**
