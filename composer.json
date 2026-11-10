@@ -10,7 +10,12 @@
   ],
   "license": "MIT",
   "require": {
-    "laminas/laminas-soap": "^2.9"
+    "php": "^7.3 || ^8.0",
+    "ext-soap": "*",
+    "illuminate/http": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+    "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+    "illuminate/view": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+    "laminas/laminas-soap": ">=2.9.0 <2.16.0"
   },
   "require-dev": {
     "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",

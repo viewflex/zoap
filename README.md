@@ -8,7 +8,14 @@ Instant SOAP server for Laravel and Lumen, turns any class into a WS-I compliant
 
 ### System Requirements
 
-Laravel or Lumen framework, version 5.2 or greater.
+| Zoap | PHP | Laravel | laminas-soap |
+|---|---|---|---|
+| 1.1.x | 7.3 – 8.5 | 8 – 13 | 2.9 – 2.15 |
+| 1.0.x | 7.3+ | 5.2+ | ^2.9 |
+
+The PHP `soap` extension is required. Composer automatically installs the newest laminas-soap release supporting your PHP version.
+
+Lumen is still supported by the code, but is considered legacy and is not covered by the test suite. For Laravel or Lumen versions older than 8, use Zoap 1.0.x.
 
 ### Basic Steps
 
@@ -35,15 +42,9 @@ From your Laravel or Lumen application's root directory, install via Composer:
 composer require viewflex/zoap
 ```
 
-After installing, add the `ZoapServiceProvider` to the list of service providers:
-
 ### For Laravel
 
-Add this line in `config/app.php`. If you are using Laravel version 5.5 or greater, this step is not necessary.
-
-```php
-Viewflex\Zoap\ZoapServiceProvider::class,
-```
+The `ZoapServiceProvider` is registered automatically via package auto-discovery; no further steps are necessary.
 
 ### For Lumen
 
@@ -111,7 +112,9 @@ Specify the class you want to serve. Public attributes and methods of this class
 
 #### Exceptions
 
-List any exceptions you want caught and converted to a `SoapFault`. Using `Exception` will catch all exceptions, or you can be more specific and list individual child exceptions. Any exceptions not on this whitelist may return unpredictable results, including no result at all. We don't want to let the server return a `SoapFault` directly, which could expose a stack trace; instead the exception is caught and then returned as a `SoapFault` with the proper message.
+List any exceptions you want caught and converted to a `SoapFault` with their own message. Using `Exception` will catch all exceptions, or you can be more specific and list individual child exceptions. Exceptions not on this whitelist, and PHP errors, are returned as a `SoapFault` with the message 'Unknown error', so internal details are not exposed (they are logged if [logging](#logging) is enabled).
+
+All faults are returned with an HTTP status of 500, as specified by SOAP 1.1.
 
 #### Types
 
@@ -127,6 +130,8 @@ Specify one of these `ComplexTypeStrategyInterface` implementations to use in au
 * DefaultComplexType
 
 If not specified, the `ArrayOfTypeComplex` strategy will be used.
+
+Note that `DefaultComplexType` does not support array types (such as `KeyValue[]`); auto-discovery will fail with the message 'Cannot add a complex type ... in "DefaultComplexType" strategy'. Use `ArrayOfTypeComplex` or `ArrayOfTypeSequence` for services using arrays of complex types.
 
 #### Headers
 
@@ -173,11 +178,11 @@ The Demo service class provides an example of how method parameters and return v
 /**
  * Returns an array of products by search criteria.
  *
- * @param \Viewflex\Zoap\Types\KeyValue[] $criteria
+ * @param \Viewflex\Zoap\Demo\Types\KeyValue[] $criteria
  * @param string $token
  * @param string $user
  * @param string $password
- * @return \Viewflex\Zoap\Types\Product[]
+ * @return \Viewflex\Zoap\Demo\Types\Product[]
  * @throws SoapFault
  */
  public function getProducts($criteria = [], $token = '', $user = '', $password = '')
@@ -545,9 +550,49 @@ To access a service method, use a POST request with `Content-Type` header of 'ap
 </SOAP-ENV:Envelope>
 ```
 
+#### Faults
+
+If authentication fails (or any other fault occurs), a SOAP fault is returned with an HTTP status of 500:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Body>
+        <SOAP-ENV:Fault>
+            <faultcode>SOAP-ENV:Client</faultcode>
+            <faultstring>Incorrect credentials.</faultstring>
+        </SOAP-ENV:Fault>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+```
+
 ## Tests
 
+### Package Test Suite
+
+The package includes a PHPUnit test suite, run in-process via [Orchestra Testbench](https://github.com/orchestral/testbench). From the package directory:
+
+```bash
+composer install
+vendor/bin/phpunit
+```
+
+The `Live` test suite runs the Demo service scenarios over real HTTP against a running Laravel application with Zoap installed, including requests via PHP's native `SoapClient`. Set `ZOAP_LIVE_URL` to the application's base URL:
+
+```bash
+ZOAP_LIVE_URL=http://example.com vendor/bin/phpunit --testsuite Live
+```
+
+### Postman
+
 Using an HTTP client such as [Postman](https://www.getpostman.com/), you can test your services directly with XML requests. A [Postman collection file](tests/Zoap.postman_collection.json) for the Demo service is included in this package's `tests` directory; you can run the collection's test suite from within Postman or on the command line via Newman (see Postman docs). Set the collection variable `domain` to your Laravel app's actual domain (instead of 'http://example.com').
+
+## Upgrading From 1.0.x
+
+* Faults are now always returned with an HTTP status of 500, regardless of server environment. Previously the status depended on the server (raw `Status` headers were only honored by PHP-FPM/CGI), and the Demo service returned 401 or 400.
+* Exceptions not listed in a service's `exceptions` config, and PHP errors, are returned as faults with the message 'Unknown error'.
+* If you previously published the fault view (`resources/views/vendor/zoap/fault.blade.php`), re-publish it or apply the changes from the package's copy: the XML declaration is now output safely when PHP's `short_open_tag` is enabled, and fault values are XML-escaped.
+* The server no longer fetches its own WSDL over HTTP for each request; the WSDL is generated in-process. This also allows Zoap to work under `php artisan serve` and Laravel Octane.
 
 ## License
 
