@@ -5,6 +5,7 @@ namespace Viewflex\Zoap\Tests\Live;
 use PHPUnit\Framework\TestCase;
 use SoapClient;
 use SoapFault;
+use Viewflex\Zoap\Tests\Support\DemoServiceScenarios;
 use Viewflex\Zoap\Tests\Support\Soap;
 
 /**
@@ -15,10 +16,7 @@ use Viewflex\Zoap\Tests\Support\Soap;
  */
 class DemoServiceLiveTest extends TestCase
 {
-    /**
-     * @var string
-     */
-    protected $endpoint;
+    use DemoServiceScenarios;
 
     protected function setUp(): void
     {
@@ -31,14 +29,6 @@ class DemoServiceLiveTest extends TestCase
         $this->endpoint = rtrim($base, '/') . '/zoap/demo/server';
     }
 
-    /**
-     * Send an HTTP request, returning [status, content type, body].
-     *
-     * @param string $method
-     * @param string $url
-     * @param string|null $body
-     * @return array
-     */
     protected function http($method, $url, $body = null)
     {
         $ch = curl_init($url);
@@ -58,13 +48,6 @@ class DemoServiceLiveTest extends TestCase
         return [$status, $type, (string) $content];
     }
 
-    protected function call($operation, array $params, $endpoint = null)
-    {
-        $endpoint = $endpoint ?: $this->endpoint;
-
-        return $this->http('POST', $endpoint, Soap::envelope($this->endpoint, $operation, Soap::params($params)));
-    }
-
     protected function soapClient()
     {
         return new SoapClient($this->endpoint . '?wsdl', [
@@ -72,114 +55,6 @@ class DemoServiceLiveTest extends TestCase
             'exceptions' => true,
             'connection_timeout' => 20,
         ]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | WSDL
-    |--------------------------------------------------------------------------
-    */
-
-    public function testWsdlMatchesSnapshot()
-    {
-        list($status, $type, $body) = $this->http('GET', $this->endpoint . '?wsdl');
-
-        $this->assertSame(200, $status);
-        $this->assertStringStartsWith('application/xml', $type);
-        $this->assertNotNull(Soap::xpath($body), 'WSDL is not well-formed XML.');
-        $this->assertSame(Soap::wsdlFixture($this->endpoint), $body);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Successful Operations
-    |--------------------------------------------------------------------------
-    */
-
-    public function testAuthReturnsToken()
-    {
-        list($status, , $body) = $this->call('auth', ['user' => Soap::USER, 'password' => Soap::PASSWORD]);
-
-        $this->assertSame(200, $status);
-        $this->assertSame('true', Soap::value($body, '//authResult/item[key="status"]/value'));
-        $this->assertSame(Soap::TOKEN, Soap::value($body, '//authResult/item[key="token"]/value'));
-    }
-
-    public function testPingWithValidToken()
-    {
-        list($status, , $body) = $this->call('ping', ['token' => Soap::TOKEN]);
-
-        $this->assertSame(200, $status);
-        $this->assertSame('true', Soap::value($body, '//pingResult'));
-    }
-
-    public function testPingWithInvalidToken()
-    {
-        list($status, , $body) = $this->call('ping', ['token' => 'wrong']);
-
-        $this->assertSame(200, $status);
-        $this->assertSame('false', Soap::value($body, '//pingResult'));
-    }
-
-    public function testGetProduct()
-    {
-        list($status, , $body) = $this->call('getProduct', ['productId' => 456, 'token' => Soap::TOKEN]);
-
-        $this->assertSame(200, $status);
-        $this->assertSame('456', Soap::value($body, '//getProductResult/id'));
-        $this->assertSame('North Face Summit Ski Jacket', Soap::value($body, '//getProductResult/name'));
-        $this->assertSame('249.98', Soap::value($body, '//getProductResult/price'));
-    }
-
-    public function testGetProducts()
-    {
-        $criteria = '<oper:keyValue><oper:key>category</oper:key><oper:value>Outerwear</oper:value></oper:keyValue>';
-        list($status, , $body) = $this->call('getProducts', ['criteria' => $criteria, 'token' => Soap::TOKEN]);
-
-        $this->assertSame(200, $status);
-        $this->assertSame(2, Soap::count($body, '//getProductsResult/*'));
-        $this->assertSame('Marmot Crew Neck Base Layer', Soap::value($body, '//getProductsResult/*[2]/name'));
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Faults
-    |--------------------------------------------------------------------------
-    */
-
-    public function testAuthWithBadCredentialsFaults()
-    {
-        list($status, $type, $body) = $this->call('auth', ['user' => 'x', 'password' => 'y']);
-
-        $this->assertSame('Incorrect credentials.', Soap::faultString($body));
-        $this->assertStringStartsWith('application/xml', $type);
-        $this->assertSame(500, $status);
-    }
-
-    public function testGetProductWithoutIdFaults()
-    {
-        list($status, , $body) = $this->call('getProduct', ['productId' => 0, 'token' => Soap::TOKEN]);
-
-        $this->assertSame('Please specify product id.', Soap::faultString($body));
-        $this->assertSame(500, $status);
-    }
-
-    public function testGetProductsWithBadTokenFaults()
-    {
-        list($status, , $body) = $this->call('getProducts', ['token' => 'wrong']);
-
-        $this->assertSame('Incorrect credentials.', Soap::faultString($body));
-        $this->assertSame(500, $status);
-    }
-
-    public function testUnknownServiceFaults()
-    {
-        $endpoint = str_replace('/zoap/demo/', '/zoap/nope/', $this->endpoint);
-        list($status, $type, $body) = $this->call('ping', [], $endpoint);
-
-        $this->assertSame('Please specify a valid service configuration.', Soap::faultString($body));
-        $this->assertStringStartsWith('application/xml', $type);
-        $this->assertSame(500, $status);
     }
 
     /*
