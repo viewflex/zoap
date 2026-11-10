@@ -21,6 +21,10 @@
 							"pm.test(\"Complex type 'ArrayOfProduct' was discovered\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"tns:ArrayOfProduct\");",
 							"});",
+							"",
+							"pm.test(\"Operation 'getProducts' was discovered\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"<operation name=\\\"getProducts\\\">\");",
+							"});",
 							""
 						]
 					}
@@ -74,6 +78,10 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
+							"",
+							"pm.test(\"Status is true\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"<key>status</key><value>true</value>\");",
+							"});",
 							""
 						]
 					}
@@ -114,9 +122,14 @@
 						"id": "8b8d5ac3-d83e-4f38-890b-abbcbe524b41",
 						"type": "text/javascript",
 						"exec": [
-							"pm.test(\"Body contains 'true'\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"true\");",
-							"});"
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Ping result is true\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"<pingResult>true</pingResult>\");",
+							"});",
+							""
 						]
 					}
 				}
@@ -158,6 +171,10 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Product was returned\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"<name>North Face Summit Ski Jacket</name>\");",
 							"});",
 							""
 						]
@@ -202,6 +219,10 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
+							"",
+							"pm.test(\"Second product was returned\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"<name>Marmot Crew Neck Base Layer</name>\");",
+							"});",
 							""
 						]
 					}
@@ -227,6 +248,100 @@
 					"path": [
 						"zoap",
 						"demo",
+						"server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth (bad credentials)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "72372ead-699d-4898-a7a7-468b0a67b65f",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 500\", function () {",
+							"    pm.response.to.have.status(500);",
+							"});",
+							"",
+							"pm.test(\"Fault is returned\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"<faultstring>Incorrect credentials.</faultstring>\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:oper=\"{{domain}}/zoap/demo/server\">\n    <soapenv:Header/>\n    <soapenv:Body>\n        <oper:auth>\n            <oper:user>{{user}}</oper:user>\n            <oper:password>wrong</oper:password>\n        </oper:auth>\n    </soapenv:Body>\n</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "{{domain}}/zoap/demo/server",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"zoap",
+						"demo",
+						"server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "unknown service",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b22c0aca-6790-4647-b583-756eb98fc885",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 500\", function () {",
+							"    pm.response.to.have.status(500);",
+							"});",
+							"",
+							"pm.test(\"Fault is returned\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"<faultstring>Please specify a valid service configuration.</faultstring>\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:oper=\"{{domain}}/zoap/demo/server\">\n    <soapenv:Header/>\n    <soapenv:Body>\n        <oper:auth>\n            <oper:user>{{user}}</oper:user>\n            <oper:password>{{password}}</oper:password>\n        </oper:auth>\n    </soapenv:Body>\n</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "{{domain}}/zoap/nope/server",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"zoap",
+						"nope",
 						"server"
 					]
 				}

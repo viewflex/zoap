@@ -1,0 +1,62 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.stack.php }} / Testbench ${{ matrix.stack.testbench }} / ${{ matrix.deps }} laminas
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        deps: [newest, lowest]
+        stack:
+          - { php: '7.3', testbench: '^6.0' }
+          - { php: '7.4', testbench: '^6.0' }
+          - { php: '8.0', testbench: '^6.0' }
+          - { php: '8.0', testbench: '^7.0' }
+          - { php: '8.1', testbench: '^7.0' }
+          - { php: '8.1', testbench: '^8.0' }
+          - { php: '8.2', testbench: '^8.0' }
+          - { php: '8.2', testbench: '^9.0' }
+          - { php: '8.2', testbench: '^10.0' }
+          - { php: '8.3', testbench: '^9.0' }
+          - { php: '8.3', testbench: '^10.0' }
+          - { php: '8.3', testbench: '^11.0' }
+          - { php: '8.4', testbench: '^10.0' }
+          - { php: '8.4', testbench: '^11.0' }
+          - { php: '8.5', testbench: '^10.0' }
+          - { php: '8.5', testbench: '^11.0' }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.stack.php }}
+          extensions: soap, dom, curl, mbstring
+          ini-values: short_open_tag=On
+          coverage: none
+          tools: composer:v2
+
+      # Older Laravel releases have published security advisories; allow them for testing.
+      - name: Allow packages with advisories
+        run: composer config policy.advisories.block false || composer config audit.block-insecure false
+
+      - name: Install dependencies
+        run: |
+          composer require --dev --no-update "orchestra/testbench:${{ matrix.stack.testbench }}"
+          composer update --no-interaction --no-progress
+
+      - name: Use lowest laminas packages
+        if: matrix.deps == 'lowest'
+        run: composer update 'laminas/*' --prefer-lowest --with-dependencies --no-interaction --no-progress
+
+      - name: Show versions
+        run: composer show laminas/laminas-soap laravel/framework | grep -E '^(name|versions)'
+
+      - name: Run tests
+        run: vendor/bin/phpunit --testsuite Unit,Feature
