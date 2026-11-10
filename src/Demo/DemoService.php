@@ -31,7 +31,6 @@ class DemoService
         if (Provider::validateUser($user, $password)) {
             return ['status' => 'true', 'token' => Provider::getToken($user)];
         } else {
-            header("Status: 401");
             throw new SoapFault('SOAP-ENV:Client', 'Incorrect credentials.');
 
         }
@@ -65,12 +64,10 @@ class DemoService
     {
 
         if (! $productId) {
-            header("Status: 400");
             throw new SoapFault('SOAP-ENV:Client', 'Please specify product id.');
         }
 
         if (! Provider::authenticate($token, $user, $password)) {
-            header("Status: 401");
             throw new SoapFault('SOAP-ENV:Client', 'Incorrect credentials.');
         }
 
@@ -91,7 +88,6 @@ class DemoService
     {
 
         if (! Provider::authenticate($token, $user, $password)) {
-            header("Status: 401");
             throw new SoapFault('SOAP-ENV:Client', 'Incorrect credentials.');
         }
 
