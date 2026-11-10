@@ -4,6 +4,7 @@
 # laminas packages Composer can install, without touching this directory's vendor.
 #
 # Usage: scripts/test-matrix.sh [php-version ...]     e.g. scripts/test-matrix.sh 8.0 8.5
+#        TESTBENCH=^10.0 scripts/test-matrix.sh 8.5        (override the Testbench version)
 #
 # Requires Laravel Herd PHP binaries (php80 ... php85), or set PHP_BIN_DIR.
 
@@ -36,7 +37,7 @@ RESULTS=()
 STATUS=0
 
 for version in "${VERSIONS[@]}"; do
-    testbench="$(testbench_for "$version")" || { echo "Unsupported PHP version: $version"; exit 1; }
+    testbench="${TESTBENCH:-$(testbench_for "$version")}" || { echo "Unsupported PHP version: $version"; exit 1; }
     php=("$PHP_BIN_DIR/php${version/./}" -d pcre.jit=0)
 
     for deps in newest lowest; do
