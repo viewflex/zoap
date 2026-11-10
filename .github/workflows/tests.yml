@@ -32,7 +32,7 @@ jobs:
           - { php: '8.5', testbench: '^11.0' }
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -56,7 +56,9 @@ jobs:
         run: composer update 'laminas/*' --prefer-lowest --with-dependencies --no-interaction --no-progress
 
       - name: Show versions
-        run: composer show laminas/laminas-soap laravel/framework | grep -E '^(name|versions)'
+        run: |
+          composer show laminas/laminas-soap | grep -E '^(name|versions) '
+          composer show laravel/framework | grep -E '^(name|versions) '
 
       - name: Run tests
         run: vendor/bin/phpunit --testsuite Unit,Feature
