@@ -12,10 +12,22 @@
   "require": {
     "laminas/laminas-soap": "^2.9"
   },
+  "require-dev": {
+    "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
+    "phpunit/phpunit": "^9.5|^10.5|^11.5|^12.0"
+  },
   "autoload": {
     "psr-4": {
       "Viewflex\\Zoap\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Viewflex\\Zoap\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
   },
   "extra": {
     "laravel": {
@@ -23,5 +35,8 @@
         "Viewflex\\Zoap\\ZoapServiceProvider"
       ]
     }
+  },
+  "config": {
+    "sort-packages": true
   }
 }
